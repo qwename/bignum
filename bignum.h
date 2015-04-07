@@ -43,10 +43,14 @@ class BigNum {
         BigNum operator/(const BigNum &rhs) const;
 
     private:
-        bool isValidNumber(const string n) const;
         void removeZeros();     // Remove leading and trailing zeros
+        void alignDigits(const BigNum &);
         int floorDigits() const;
         int fractDigits() const;
+        void shiftLeft();
+        void shiftRight();
+        static int compareMagnitude(const BigNum &, const BigNum &);
+        static void throwInvalidNumber(const string &);
 
         static const unsigned int DefaultBase;
         bool neg;               // Negative
