@@ -13,11 +13,11 @@ class BigNum {
         BigNum(int n);
         BigNum(string n);
         ~BigNum();
-        void print() const;
+        friend void print(const BigNum &);
         int getDigits() const;
-        string toStr() const;
-        BigNum Floor() const;   // Integer digits
-        BigNum Fract() const;   // Fractional digits
+        friend string toStr(const BigNum &);
+        friend BigNum Floor(const BigNum &);    // Integer digits
+        friend BigNum Fract(const BigNum &);    // Fractional digits
 
         BigNum& operator=(const BigNum &rhs);
         bool operator==(const BigNum &rhs) const;
@@ -42,7 +42,7 @@ class BigNum {
         BigNum operator/(const BigNum &rhs) const;
 
     private:
-        bool isValidNumber(string n) const;
+        bool isValidNumber(const string n) const;
         void removeZeros();     // Remove leading and trailing zeros
         int floorDigits() const;
         int fractDigits() const;
