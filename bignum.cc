@@ -15,6 +15,7 @@ BigNum::BigNum(int n) : neg(n < 0), sig(), base(DefaultBase), exp(0)
     if (0 == n)
     {
         sig.push_back(0);
+        return;
     }
     if (neg)
     {
@@ -29,73 +30,53 @@ BigNum::BigNum(int n) : neg(n < 0), sig(), base(DefaultBase), exp(0)
 
 BigNum::BigNum(string n) : neg('-' == n[0]), sig(), base(DefaultBase), exp(0)
 {
-    if (!isValidNumber(n))
+    if (n.size() < 1)
     {
-        throw string("Invalid Number: ") + n;
+        throwInvalidNumber(n);
     }
-    bool decimal = false, nonzero = false, leading_zero = true;
+    bool decimal = false, valid = false;
     char val = 0;
     string::const_iterator i = n.begin();
     if (neg)
     {
-        n = n.substr(1);
-        i = n.begin();
+        ++i;
     }
-    int trailing_zero = 0;
     for (; i != n.end(); ++i)
     {
+        if ('-' == *i)
+        {
+            throwInvalidNumber(n);
+        }
         if ('.' == *i)
         {
-            if (0 == sig.size())
+            if (decimal)
+            {
+                throwInvalidNumber(n);
+            }
+            if (0 == sig.size()) // "0." vs "."
             {
                 sig.push_back(0);
             }
             decimal = true;
-            leading_zero = false;
             continue;
         }
+        if (*i < '0' || '9' < *i)
+        {
+            throwInvalidNumber(n);
+        }
+        valid = true;
         val = *i - '0';
-        if (leading_zero)
-        {
-            if (val != 0)
-            {
-                leading_zero = false;
-            }
-            else
-            {
-                continue;
-            }
-        }
-        if (!nonzero && val != 0)
-        {
-            nonzero = true;
-        }
         if (decimal)
         {
-            if (0 == val)
-            {
-                ++trailing_zero;
-            }
-            else if (trailing_zero > 0)
-            {
-                trailing_zero = 0;
-            }
             --exp;
         }
         sig.push_back(val);
     }
-    if (!nonzero)
+    if (!valid)
     {
-        sig.clear();
-        sig.push_back(0);
-        exp = 0;
-        return;
+        throwInvalidNumber(n);
     }
-    for (; trailing_zero != 0; --trailing_zero)
-    {
-        sig.pop_back();
-        ++exp;
-    }
+    removeZeros();
 }
 
 BigNum::~BigNum() { }
@@ -181,19 +162,11 @@ bool BigNum::operator==(const BigNum &rhs) const
     {
         return false;
     }
-    if (getDigits() != rhs.getDigits())
+    if (exp != rhs.exp)
     {
         return false;
     }
-    vector<char>::const_iterator i, j;
-    for (i = sig.begin(), j = rhs.sig.begin(); i != sig.end(); ++i, ++j)
-    {
-        if (*j != *i)
-        {
-            return false;
-        }
-    }
-    return true;
+    return 0 == compareMagnitude(*this, rhs);
 }
 
 bool BigNum::operator!=(const BigNum &rhs) const
@@ -211,52 +184,19 @@ bool BigNum::operator<(const BigNum &rhs) const
     {
         return true;
     }
-    vector<char>::const_iterator i, j;
-    int digits = getDigits() + exp;
-    int rhs_digits = rhs.getDigits() + rhs.exp;
-    if (!neg)   // Both positive
+    if (neg)    // Both negative
     {
-        if (digits > rhs_digits)
-        {
-            return false;
-        }
-        else if (digits == rhs_digits)
-        {
-            for (i = sig.begin(), j = rhs.sig.begin(); i != sig.end(); ++i, ++j)
-            {
-                if (*i == *j)
-                {
-                    continue;
-                }
-                if (*i > *j)
-                {
-                    return false;
-                }
-            }
-            if (sig.back() == rhs.sig.back()) // Equal
-            {
-                return false;
-            }
-        }
+        return -rhs < -*this; // larger magnitude <=> smaller
     }
-    else        // Both negative
+    int result = compareMagnitude(Floor(*this), Floor(rhs));
+    if (0 == result)
     {
-        if (digits < rhs_digits)
-        {
-            return false;
-        }
-        else if (digits == rhs_digits)
-        {
-            for (i = sig.begin(), j = rhs.sig.begin(); i != sig.end(); ++i, ++j)
-            {
-                if (*i <= *j)
-                {
-                    return false;
-                }
-            }
-        }
+        return -1 == compareMagnitude(Fract(*this), Fract(rhs));
     }
-    return true;
+    else
+    {
+        return -1 == result;
+    }
 }
 
 bool BigNum::operator<=(const BigNum &rhs) const
@@ -313,14 +253,8 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
     }
     char temp = 0;
     bool carry = false;
-    // Add zeros for easier addition logic
-    while (fractDigits() < rhs.fractDigits())
-    {
-        sig.push_back(0);
-        --exp;
-    }
-    // Align
-    vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
+    alignDigits(rhs);
+    vector<char>::reverse_iterator i = sig.rbegin();
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     vector<char>::reverse_iterator k;
     for (;j != rhs.sig.rend(); ++i, ++j)
@@ -464,7 +398,7 @@ BigNum& BigNum::operator*=(const BigNum &rhs)
         temp = products[*i];
         for (int k = 0; k < j; ++k)
         {
-                temp.sig.push_back(0);
+                temp.shiftLeft();
         }
         *this += temp;
     }
@@ -518,58 +452,13 @@ BigNum BigNum::operator/(const BigNum &rhs) const
     return temp /= rhs;
 }
 
-bool BigNum::isValidNumber(string n) const
-{
-    if (n.size() < 1)
-    {
-        return false;
-    }
-    bool decimal = false, digits = false;
-    for (string::const_iterator i = n.begin(); i != n.end(); ++i)
-    {
-        switch (*i)
-        {
-            case '.':
-            {
-                if (decimal)
-                {
-                    return false;
-                }
-                decimal = true;
-                continue;
-            }
-            case '-':
-            {
-                if (i != n.begin())
-                {
-                    return false;
-                }
-                continue;
-            }
-            default:
-            {
-                if (*i < '0' || '9' < *i)
-                {
-                    return false;
-                }
-                digits = true;
-            }
-        }
-    }
-    if (!digits)
-    {
-        return false;
-    }
-    return true;
-}
-
 void BigNum::removeZeros()
 {
     while (floorDigits() > 1 && 0 == sig[0]) // Remove leading zeros
     {
         sig.erase(sig.begin());
     }
-    while (fractDigits() > 1 && sig.back() == 0) // Remove trailing zeros
+    while (fractDigits() > 0 && sig.back() == 0) // Remove trailing zeros
     {
         sig.pop_back();
         ++exp;
@@ -591,4 +480,74 @@ int BigNum::fractDigits() const
     {
         return 0;
     }
+}
+
+// Multiply by base
+void BigNum::shiftLeft()
+{
+    if (0 == exp)
+    {
+        sig.push_back(0);
+    }
+    else
+    {
+        ++exp;
+    }
+}
+
+// Divide by base
+void BigNum::shiftRight()
+{
+    --exp;
+}
+
+void BigNum::alignDigits(const BigNum &bn)
+{
+    while (fractDigits() < bn.fractDigits())
+    {
+        sig.push_back(0);
+        --exp;
+    }
+    while (floorDigits() < bn.floorDigits())
+    {
+        sig.insert(sig.begin(), 0);
+    }
+}
+
+int BigNum::compareMagnitude(const BigNum &bn1, const BigNum &bn2)
+{   // return -1 if 1 < 2, 0 if 1 == 2, 1 if 1 > 2
+    if (bn1.base != bn2.base)
+    {
+        throw string("Error: Base mismatch.");
+    }
+    if (bn1.getDigits() < bn2.getDigits())
+    {
+        return -1;
+    }
+    if (bn1.getDigits() > bn2.getDigits())
+    {
+        return 1;
+    }
+    vector<char>::const_iterator i, j;
+    for (i = bn1.sig.begin(), j = bn2.sig.begin(); j != bn2.sig.end(); ++i, ++j)
+    {
+        if (*i == *j)
+        {
+            continue;
+        }
+        if (*i < *j)
+        {
+            return -1;
+        }
+        if (*i > *j)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void BigNum::throwInvalidNumber(const string &n)
+{
+    throw string("Invalid Number: ") + n;
 }
