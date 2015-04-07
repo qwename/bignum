@@ -38,13 +38,18 @@ BigNum::BigNum(string n) : neg('-' == n[0]), sig(), base(DefaultBase), exp(0)
     string::const_iterator i = n.begin();
     if (neg)
     {
-        ++i;
+        n = n.substr(1);
+        i = n.begin();
     }
     int trailing_zero = 0;
     for (; i != n.end(); ++i)
     {
         if ('.' == *i)
         {
+            if (0 == sig.size())
+            {
+                sig.push_back(0);
+            }
             decimal = true;
             leading_zero = false;
             continue;
@@ -100,24 +105,59 @@ void BigNum::print() const
 {
     using std::cout;
     using std::endl;
-    if (neg)
-    {
-        cout << "-";
-    }
-    for (vector<char>::const_iterator i = sig.begin(); i != sig.end(); ++i)
-    {
-        if (sig.size() + exp == i - sig.begin())
-        {
-            cout << '.';
-        }
-        cout << (int)*i;
-    }
-    cout << endl;
+    cout << toStr() << endl;
 }
 
 int BigNum::getDigits() const
 {
     return sig.size();
+}
+
+string BigNum::toStr() const
+{
+    string s = "";
+    if (neg)
+    {
+        s += "-";
+    }
+    for (vector<char>::const_iterator i = sig.begin(); i != sig.end(); ++i)
+    {
+        if (floorDigits() == i - sig.begin())
+        {
+            s += '.';
+        }
+        s += (*i + '0');
+    }
+    return s;
+}
+
+BigNum BigNum::Floor() const
+{
+    string s = "";
+    if (neg)
+    {
+        s += "-";
+    }
+    for (vector<char>::const_iterator i = sig.begin(); i != sig.begin() + floorDigits(); ++i)
+    {
+        s += (*i + '0');
+    }
+    return BigNum(s);
+}
+
+BigNum BigNum::Fract() const
+{
+    string s = "";
+    if (neg)
+    {
+        s += "-";
+    }
+    s += ".";
+    for (vector<char>::const_iterator i = sig.begin() + floorDigits(); i != sig.end(); ++i)
+    {
+        s += (*i + '0');
+    }
+    return BigNum(s);
 }
 
 BigNum& BigNum::operator=(const BigNum &rhs)
@@ -178,10 +218,18 @@ bool BigNum::operator<(const BigNum &rhs) const
         {
             for (i = sig.begin(), j = rhs.sig.begin(); i != sig.end(); ++i, ++j)
             {
-                if (*i >= *j)
+                if (*i == *j)
+                {
+                    continue;
+                }
+                if (*i > *j)
                 {
                     return false;
                 }
+            }
+            if (sig.back() == rhs.sig.back()) // Equal
+            {
+                return false;
             }
         }
     }
@@ -248,46 +296,126 @@ BigNum BigNum::operator--(int)
 
 BigNum& BigNum::operator+=(const BigNum &rhs)
 {
+    if (neg && !rhs.neg)
+    {
+        *this = rhs - -(*this);
+        return *this;
+    }
+    if (!neg && rhs.neg)
+    {
+        return *this -= -rhs;
+    }
     char carry = 0, temp = 0;
     // Add zeros for easier addition logic
-    while (dp() < rhs.dp())
+    while (fractDigits() < rhs.fractDigits())
     {
         sig.push_back(0);
         --exp;
     }
     // Align
-    vector<char>::reverse_iterator i = sig.rbegin() + (dp() - rhs.dp());
+    vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     for (; j != rhs.sig.rend(); ++i, ++j)
     {
         if (sig.rend() == i)
         {
-            sig.insert(sig.begin(), *j);
+            sig.insert(sig.begin(), *j + carry);
             i = sig.rend() - 1;
+            carry = 0;
             continue;
         }
         temp = *i + *j + carry;
         carry = temp / base;
         *i = temp % base;
     }
+    if (carry > 0)
+    {
+        sig.insert(sig.begin(), carry);
+    }
+    removeZeros();
     return *this;
 }
 
 BigNum& BigNum::operator-=(const BigNum &rhs)
 {
+    if (rhs.neg)
+    {
+        return *this += -rhs;
+    }
+    if (neg)
+    {
+        *this = -(-(*this) + rhs);
+        return *this;
+    }
+    if (*this < rhs)
+    {
+        *this = -(rhs - *this);
+        return *this;
+    }
+    // Add zeros for easier subtraction logic
+    while (fractDigits() < rhs.fractDigits())
+    {
+        sig.push_back(0);
+        --exp;
+    }
+    char temp = 0;
+    bool borrow = false, leading_digit = false;
+    // Align
+    vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
+    vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
+    vector<char>::reverse_iterator k;
+    for (; j != rhs.sig.rend(); ++i, ++j)
+    {
+        temp = *i - *j;
+        borrow = (temp < 0);
+        if (borrow)
+        {
+            for (k = i + 1; k != sig.rend(); ++k)
+            {
+                if (*k != 0)
+                {
+                    --(*k);
+                    do
+                    {
+                        --k;
+                        *k += 9;
+                    } while (k != i);
+                    *i -= *j - 1;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            *i = temp;
+        }
+    }
+    removeZeros();
     return *this;
 }
 
-BigNum BigNum::operator+()
+BigNum BigNum::operator+() const
 {
     return *this;
 }
 
-BigNum BigNum::operator-()
+BigNum BigNum::operator-() const
 {
     BigNum temp = *this;
     temp.neg = !temp.neg;
     return temp;
+}
+
+BigNum BigNum::operator+(const BigNum &rhs) const
+{
+    BigNum temp = *this;
+    return temp += rhs;
+}
+
+BigNum BigNum::operator-(const BigNum &rhs) const
+{
+    BigNum temp = *this;
+    return temp -= rhs;
 }
 
 bool BigNum::isValidNumber(string n) const
@@ -335,7 +463,25 @@ bool BigNum::isValidNumber(string n) const
     return true;
 }
 
-int BigNum::dp() const
+void BigNum::removeZeros()
+{
+    while (floorDigits() > 1 && 0 == sig[0]) // Remove leading zeros
+    {
+        sig.erase(sig.begin());
+    }
+    while (fractDigits() > 1 && sig.back() == 0) // Remove trailing zeros
+    {
+        sig.pop_back();
+        ++exp;
+    }
+}
+
+int BigNum::floorDigits() const
+{
+    return sig.size() + exp;
+}
+
+int BigNum::fractDigits() const
 {
     if (exp < 0)
     {
