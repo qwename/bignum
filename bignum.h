@@ -29,9 +29,11 @@ class BigNum {
         BigNum& operator++();   // Pre-increment
         BigNum operator++(int); // Post-increment
         BigNum& operator--();   // Pre-decrement
-        BigNum operator--(int);// Post-decrement
+        BigNum operator--(int); // Post-decrement
         BigNum& operator+=(const BigNum &rhs);
         BigNum& operator-=(const BigNum &rhs);
+        BigNum& operator*=(const BigNum &rhs);
+        BigNum& operator/=(const BigNum &rhs);
         BigNum operator+() const;
         BigNum operator-() const;
         BigNum operator+(const BigNum &rhs) const;
