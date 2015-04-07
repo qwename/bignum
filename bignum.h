@@ -15,6 +15,9 @@ class BigNum {
         ~BigNum();
         void print() const;
         int getDigits() const;
+        string toStr() const;
+        BigNum Floor() const;   // Integer digits
+        BigNum Fract() const;   // Fractional digits
 
         BigNum& operator=(const BigNum &rhs);
         bool operator==(const BigNum &rhs) const;
@@ -29,17 +32,20 @@ class BigNum {
         BigNum operator--(int);// Post-decrement
         BigNum& operator+=(const BigNum &rhs);
         BigNum& operator-=(const BigNum &rhs);
-        BigNum operator+();
-        BigNum operator-();
-        BigNum operator+(const BigNum &rhs);
-        BigNum operator-(const BigNum &rhs);
-        BigNum operator*(const BigNum &rhs);
-        BigNum operator/(const BigNum &rhs);
+        BigNum operator+() const;
+        BigNum operator-() const;
+        BigNum operator+(const BigNum &rhs) const;
+        BigNum operator-(const BigNum &rhs) const;
+        BigNum operator*(const BigNum &rhs) const;
+        BigNum operator/(const BigNum &rhs) const;
 
     private:
         bool isValidNumber(string n) const;
+        void removeZeros();     // Remove leading and trailing zeros
+        int floorDigits() const;
+        int fractDigits() const;
+
         static const unsigned int DefaultBase;
-        inline int dp() const;  // Decimal places
         bool neg;               // Negative
         vector<char> sig;       // Significand
         int base;
