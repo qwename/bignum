@@ -101,11 +101,11 @@ BigNum::BigNum(string n) : neg('-' == n[0]), sig(), base(DefaultBase), exp(0)
 BigNum::~BigNum() { }
 
 // Add significant digits, decimal places
-void BigNum::print() const
+void print(const BigNum &bn)
 {
     using std::cout;
     using std::endl;
-    cout << toStr() << endl;
+    cout << toStr(bn) << endl;
 }
 
 int BigNum::getDigits() const
@@ -113,51 +113,48 @@ int BigNum::getDigits() const
     return sig.size();
 }
 
-string BigNum::toStr() const
+string toStr(const BigNum &bn)
 {
     string s = "";
-    if (neg)
+    if (bn.neg)
     {
         s += "-";
     }
-    for (vector<char>::const_iterator i = sig.begin(); i != sig.end(); ++i)
+    for (int i = 0; i < bn.sig.size(); ++i)
     {
-        if (floorDigits() == i - sig.begin())
+        if (bn.floorDigits() == i)
         {
             s += '.';
         }
-        s += (*i + '0');
+        s += (bn.sig[i] + '0');
     }
     return s;
 }
 
-BigNum BigNum::Floor() const
+BigNum Floor(const BigNum &bn)
 {
-    string s = "";
-    if (neg)
+    BigNum temp;
+    for (int i = 0; i < bn.floorDigits(); ++i)
     {
-        s += "-";
+        temp.sig.push_back(bn.sig[i]);
     }
-    for (vector<char>::const_iterator i = sig.begin(); i != sig.begin() + floorDigits(); ++i)
-    {
-        s += (*i + '0');
-    }
-    return BigNum(s);
+    temp.neg = bn.neg;
+    temp.base = bn.base;
+    temp.exp = 0;
+    return temp;
 }
 
-BigNum BigNum::Fract() const
+BigNum Fract(const BigNum &bn)
 {
-    string s = "";
-    if (neg)
+    BigNum temp;
+    for (int i = bn.floorDigits(); i < bn.getDigits(); ++i)
     {
-        s += "-";
+        temp.sig.push_back(bn.sig[i]);
     }
-    s += ".";
-    for (vector<char>::const_iterator i = sig.begin() + floorDigits(); i != sig.end(); ++i)
-    {
-        s += (*i + '0');
-    }
-    return BigNum(s);
+    temp.neg = bn.neg;
+    temp.base = bn.base;
+    temp.exp = bn.exp;
+    return temp;
 }
 
 BigNum& BigNum::operator=(const BigNum &rhs)
@@ -418,6 +415,20 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
 
 BigNum& BigNum::operator*=(const BigNum &rhs)
 {
+    if (*this == 0 || rhs == 0)
+    {
+        *this = 0;
+        return *this;
+    }
+    if (*this == 1)
+    {
+        *this = rhs;
+        return *this;
+    }
+    if (rhs == 1)
+    {
+        return *this;
+    }
     BigNum temp;
     vector<BigNum> products(10);
     products[0] = BigNum(0);
