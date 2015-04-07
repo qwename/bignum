@@ -18,6 +18,7 @@ class BigNum {
         friend string toStr(const BigNum &);
         friend BigNum Floor(const BigNum &);    // Integer digits
         friend BigNum Fract(const BigNum &);    // Fractional digits
+        friend BigNum Abs(const BigNum &);      // Absolute value
 
         BigNum& operator=(const BigNum &rhs);
         bool operator==(const BigNum &rhs) const;
