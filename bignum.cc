@@ -305,7 +305,8 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
     {
         return *this -= -rhs;
     }
-    char carry = 0, temp = 0;
+    char temp = 0;
+    bool carry = false;
     // Add zeros for easier addition logic
     while (fractDigits() < rhs.fractDigits())
     {
@@ -315,22 +316,43 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
     // Align
     vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
-    for (; j != rhs.sig.rend(); ++i, ++j)
+    vector<char>::reverse_iterator k;
+    for (;j != rhs.sig.rend(); ++i, ++j)
     {
         if (sig.rend() == i)
         {
-            sig.insert(sig.begin(), *j + carry);
+            sig.insert(sig.begin(), *j);
             i = sig.rend() - 1;
-            carry = 0;
             continue;
         }
-        temp = *i + *j + carry;
-        carry = temp / base;
+        temp = *i + *j;
+        carry = (temp >= base);
         *i = temp % base;
-    }
-    if (carry > 0)
-    {
-        sig.insert(sig.begin(), carry);
+        if (carry)
+        {
+            for (k = i + 1; k != sig.rend(); ++k)
+            {
+                if (*k < base - 1)
+                {
+                    ++(*k);
+                    for (--k; k != i; --k)
+                    {
+                        *k = 0;
+                    }
+                    break;
+                }
+            }
+            if (sig.rend() == k)
+            {
+                int pos = i - sig.rbegin();
+                sig.insert(sig.begin(), 1);
+                i = sig.rbegin() + pos;
+                for (k = sig.rend() - 2; k != i; --k)
+                {
+                    *k = 0;
+                }
+            }
+        }
     }
     removeZeros();
     return *this;
@@ -359,7 +381,7 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
         --exp;
     }
     char temp = 0;
-    bool borrow = false, leading_digit = false;
+    bool borrow = false;
     // Align
     vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
@@ -378,9 +400,9 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
                     do
                     {
                         --k;
-                        *k += 9;
+                        *k += base;
                     } while (k != i);
-                    *i -= *j - 1;
+                    *i -= *j;
                     break;
                 }
             }
@@ -391,6 +413,40 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
         }
     }
     removeZeros();
+    return *this;
+}
+
+BigNum& BigNum::operator*=(const BigNum &rhs)
+{
+    BigNum temp;
+    vector<BigNum> products(10);
+    products[0] = BigNum(0);
+    products[1] = *this;
+    for (int i = 2; i < 10; ++i)
+    {
+        products[i] = products[i - 1] + products[1];
+    }
+    *this = BigNum(0);
+    vector<char>::const_reverse_iterator i;
+    int j;
+    for (i = rhs.sig.rbegin(), j = 0; i != rhs.sig.rend(); ++i, ++j)
+    {
+        temp = products[*i];
+        for (int k = 0; k < j; ++k)
+        {
+            if (temp.exp >= 0)
+            {
+                temp.sig.push_back(0);
+            }
+            ++temp.exp;
+        }
+        *this += temp;
+    }
+    return *this;
+}
+
+BigNum& BigNum::operator/=(BigNum const &rhs)
+{
     return *this;
 }
 
@@ -416,6 +472,18 @@ BigNum BigNum::operator-(const BigNum &rhs) const
 {
     BigNum temp = *this;
     return temp -= rhs;
+}
+
+BigNum BigNum::operator*(const BigNum &rhs) const
+{
+    BigNum temp = *this;
+    return temp *= rhs;
+}
+
+BigNum BigNum::operator/(const BigNum &rhs) const
+{
+    BigNum temp = *this;
+    return temp /= rhs;
 }
 
 bool BigNum::isValidNumber(string n) const
