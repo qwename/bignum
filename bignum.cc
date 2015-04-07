@@ -157,6 +157,15 @@ BigNum Fract(const BigNum &bn)
     return temp;
 }
 
+BigNum Abs(const BigNum &bn)
+{
+    if (bn.neg)
+    {
+        return -bn;
+    }
+    return bn;
+}
+
 BigNum& BigNum::operator=(const BigNum &rhs)
 {
     neg = rhs.neg;
@@ -361,11 +370,6 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
     {
         return *this += -rhs;
     }
-    if (neg)
-    {
-        *this = -(-(*this) + rhs);
-        return *this;
-    }
     if (*this < rhs)
     {
         *this = -(rhs - *this);
@@ -420,6 +424,11 @@ BigNum& BigNum::operator*=(const BigNum &rhs)
         *this = 0;
         return *this;
     }
+    if (rhs.getDigits() > this->getDigits())
+    {
+        *this = rhs * *this;
+        return *this;
+    }
     if (*this == 1)
     {
         *this = rhs;
@@ -429,35 +438,47 @@ BigNum& BigNum::operator*=(const BigNum &rhs)
     {
         return *this;
     }
-    BigNum temp;
-    vector<BigNum> products(10);
-    products[0] = BigNum(0);
+    bool negative = (this->neg && !rhs.neg) || (!this->neg && rhs.neg);
+    int exponent = this->exp + rhs.exp;
+    this->exp = 0;
+    if (this->neg)
+    {
+        this->neg = false;
+    }
+    vector<BigNum> products(base);
     products[1] = *this;
-    for (int i = 2; i < 10; ++i)
+    for (int i = 2; i < base; ++i)
     {
         products[i] = products[i - 1] + products[1];
     }
-    *this = BigNum(0);
-    vector<char>::const_reverse_iterator i;
+    vector<char>::const_reverse_iterator i = rhs.sig.rbegin();
+    *this = products[*i];
     int j;
-    for (i = rhs.sig.rbegin(), j = 0; i != rhs.sig.rend(); ++i, ++j)
+    BigNum temp;
+    for (++i, j = 1; i != rhs.sig.rend(); ++i, ++j)
     {
+        if (0 == *i)
+        {
+            continue;
+        }
         temp = products[*i];
         for (int k = 0; k < j; ++k)
         {
-            if (temp.exp >= 0)
-            {
                 temp.sig.push_back(0);
-            }
-            ++temp.exp;
         }
         *this += temp;
     }
+    this->neg = negative;
+    this->exp = exponent;
     return *this;
 }
 
 BigNum& BigNum::operator/=(BigNum const &rhs)
 {
+    if (rhs == 0)
+    {
+        throw string("Error: Divide by zero.");
+    }
     return *this;
 }
 
