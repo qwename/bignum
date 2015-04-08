@@ -47,8 +47,8 @@ class BigNum {
         void alignDigits(const BigNum &);
         int floorDigits() const;
         int fractDigits() const;
-        void shiftLeft();
-        void shiftRight();
+        void shiftLeft(unsigned);
+        void shiftRight(unsigned);
         static int compareMagnitude(const BigNum &, const BigNum &);
         static void throwInvalidNumber(const string &);
 
