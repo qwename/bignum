@@ -1,5 +1,6 @@
 #include "bignum.h"
 #include <iostream>
+#include <algorithm>
 
 const unsigned int BigNum::DefaultBase = 10;
 
@@ -254,45 +255,31 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
     char temp = 0;
     bool carry = false;
     alignDigits(rhs);
-    vector<char>::reverse_iterator i = sig.rbegin();
+    vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     vector<char>::reverse_iterator k;
-    for (;j != rhs.sig.rend(); ++i, ++j)
+    for (; j != rhs.sig.rend(); ++i, ++j)
+    {
+        temp = *i + *j;
+        if (carry)  // Previous
+        {
+            ++temp;
+        }
+        *i = temp % base;
+        carry = (temp >= base);
+    }
+    while (carry)
     {
         if (sig.rend() == i)
         {
-            sig.insert(sig.begin(), *j);
-            i = sig.rend() - 1;
-            continue;
+            sig.insert(sig.begin(), 1);
+            i = sig.rend();
+            break;
         }
-        temp = *i + *j;
-        carry = (temp >= base);
-        *i = temp % base;
-        if (carry)
-        {
-            for (k = i + 1; k != sig.rend(); ++k)
-            {
-                if (*k < base - 1)
-                {
-                    ++(*k);
-                    for (--k; k != i; --k)
-                    {
-                        *k = 0;
-                    }
-                    break;
-                }
-            }
-            if (sig.rend() == k)
-            {
-                int pos = i - sig.rbegin();
-                sig.insert(sig.begin(), 1);
-                i = sig.rbegin() + pos;
-                for (k = sig.rend() - 2; k != i; --k)
-                {
-                    *k = 0;
-                }
-            }
-        }
+        ++(*i);
+        carry = (*i >= base);
+        *i %= base;
+        ++i;
     }
     removeZeros();
     return *this;
@@ -309,43 +296,42 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
         *this = -(rhs - *this);
         return *this;
     }
-    // Add zeros for easier subtraction logic
-    while (fractDigits() < rhs.fractDigits())
-    {
-        sig.push_back(0);
-        --exp;
-    }
+    alignDigits(rhs);
     char temp = 0;
     bool borrow = false;
-    // Align
     vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     vector<char>::reverse_iterator k;
     for (; j != rhs.sig.rend(); ++i, ++j)
     {
         temp = *i - *j;
+        if (borrow)  // Previous
+        {
+            --temp;
+        }
         borrow = (temp < 0);
         if (borrow)
         {
-            for (k = i + 1; k != sig.rend(); ++k)
-            {
-                if (*k != 0)
-                {
-                    --(*k);
-                    do
-                    {
-                        --k;
-                        *k += base;
-                    } while (k != i);
-                    *i -= *j;
-                    break;
-                }
-            }
+            *i = temp + base;
         }
         else
         {
             *i = temp;
         }
+    }
+    while (borrow)
+    {
+        if (sig.rend() == i)
+        {
+            break;
+        }
+        --(*i);
+        borrow = (*i < 0);
+        if (borrow)
+        {
+            *i += base;
+        }
+        ++i;
     }
     removeZeros();
     return *this;
@@ -353,24 +339,27 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
 
 BigNum& BigNum::operator*=(const BigNum &rhs)
 {
-    if (*this == 0 || rhs == 0)
-    {
-        *this = 0;
-        return *this;
-    }
-    if (rhs.getDigits() > this->getDigits())
+    if (this->getDigits() < rhs.getDigits())
     {
         *this = rhs * *this;
         return *this;
     }
-    if (*this == 1)
+    if (1 == rhs.getDigits())
     {
-        *this = rhs;
-        return *this;
-    }
-    if (rhs == 1)
-    {
-        return *this;
+        if (rhs == 0)
+        {
+            *this = 0;
+            return *this;
+        }
+        if (rhs == 1)
+        {
+            return *this;
+        }
+        if (rhs == -1)
+        {
+            *this = -(*this);
+            return *this;
+        }
     }
     bool negative = (this->neg && !rhs.neg) || (!this->neg && rhs.neg);
     int exponent = this->exp + rhs.exp;
@@ -396,10 +385,7 @@ BigNum& BigNum::operator*=(const BigNum &rhs)
             continue;
         }
         temp = products[*i];
-        for (int k = 0; k < j; ++k)
-        {
-                temp.shiftLeft();
-        }
+        temp.shiftLeft(j);
         *this += temp;
     }
     this->neg = negative;
@@ -483,22 +469,21 @@ int BigNum::fractDigits() const
 }
 
 // Multiply by base
-void BigNum::shiftLeft()
+void BigNum::shiftLeft(unsigned x)
 {
-    if (0 == exp)
+    x -= 0 - exp;
+    while (x > 0)
     {
         sig.push_back(0);
+        --x;
     }
-    else
-    {
-        ++exp;
-    }
+    exp = x;
 }
 
 // Divide by base
-void BigNum::shiftRight()
+void BigNum::shiftRight(unsigned x)
 {
-    --exp;
+    exp -= x;
 }
 
 void BigNum::alignDigits(const BigNum &bn)
