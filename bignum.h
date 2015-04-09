@@ -22,12 +22,16 @@ class BigNum {
         friend BigNum Abs(const BigNum &);      // Absolute value
 
         BigNum& operator=(const BigNum &rhs);
+
+        // Comparison Operators
         bool operator==(const BigNum &rhs) const;
         bool operator!=(const BigNum &rhs) const;
         bool operator<(const BigNum &rhs) const;
         bool operator>(const BigNum &rhs) const;
         bool operator<=(const BigNum &rhs) const;
         bool operator>=(const BigNum &rhs) const;
+
+        // Mutators
         BigNum& operator++();   // Pre-increment
         BigNum operator++(int); // Post-increment
         BigNum& operator--();   // Pre-decrement
@@ -36,12 +40,15 @@ class BigNum {
         BigNum& operator-=(const BigNum &rhs);
         BigNum& operator*=(const BigNum &rhs);
         BigNum& operator/=(const BigNum &rhs);
+        BigNum& operator%=(const BigNum &rhs);
+
         BigNum operator+() const;
         BigNum operator-() const;
         BigNum operator+(const BigNum &rhs) const;
         BigNum operator-(const BigNum &rhs) const;
         BigNum operator*(const BigNum &rhs) const;
         BigNum operator/(const BigNum &rhs) const;
+        BigNum operator%(const BigNum &rhs) const;
 
     private:
         void removeZeros();     // Remove leading and trailing zeros
