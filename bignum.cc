@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 
+static void printDebug(const string &s);
+
 const int BigNum::DefaultBase = 10;
 const int BigNum::DefaultPrecision = 20;
 int BigNum::precision = DefaultPrecision;
@@ -218,6 +220,7 @@ BigNum& BigNum::operator=(const BigNum &rhs)
 
 bool BigNum::operator==(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " == " + toStr(rhs));
     if (neg != rhs.neg)
     {
         return false;
@@ -231,11 +234,13 @@ bool BigNum::operator==(const BigNum &rhs) const
 
 bool BigNum::operator!=(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " != " + toStr(rhs));
     return !(*this == rhs);
 }
 
 bool BigNum::operator<(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " < " + toStr(rhs));
     if (!neg && rhs.neg)    // - !> +
     {
         return false;
@@ -261,27 +266,32 @@ bool BigNum::operator<(const BigNum &rhs) const
 
 bool BigNum::operator<=(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " <= " + toStr(rhs));
     return ((*this < rhs) || (*this == rhs));
 }
 
 bool BigNum::operator>(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " > " + toStr(rhs));
     return !(*this <= rhs);
 }
 
 bool BigNum::operator>=(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " >= " + toStr(rhs));
     return ((*this > rhs) || (*this == rhs));
 }
 
 BigNum& BigNum::operator++()
 {
+    printDebug("++" + toStr(*this));
     *this += BigNum(1);
     return *this;
 }
 
 BigNum BigNum::operator++(int)
 {
+    printDebug(toStr(*this) + "++");
     BigNum temp = *this;
     *this += BigNum(1);
     return temp;
@@ -289,12 +299,14 @@ BigNum BigNum::operator++(int)
 
 BigNum& BigNum::operator--()
 {
+    printDebug("--" + toStr(*this));
     *this -= BigNum(1);
     return *this;
 }
 
 BigNum BigNum::operator--(int)
 {
+    printDebug(toStr(*this) + "--");
     BigNum temp = *this;
     *this -= BigNum(1);
     return temp;
@@ -302,6 +314,7 @@ BigNum BigNum::operator--(int)
 
 BigNum& BigNum::operator+=(const BigNum &rhs)
 {
+    printDebug(toStr(*this) + " += " + toStr(rhs));
     if (neg && !rhs.neg)
     {
         *this = rhs - -(*this);
@@ -311,13 +324,18 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
     {
         return *this -= -rhs;
     }
+    if (sig.size() == 0)
+    {
+        *this = rhs;
+        return *this;
+    }
     char temp = 0;
     bool carry = false;
     alignDigits(rhs);
     vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     vector<char>::reverse_iterator k;
-    printDebug(*this);
+    printDebug(toStrDebug(*this));
     for (; j != rhs.sig.rend(); ++i, ++j)
     {
         temp = *i + *j;
@@ -327,7 +345,7 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
         }
         *i = temp % base;
         carry = (temp >= base);
-        printDebug(*this);
+        printDebug(toStrDebug(*this));
     }
     while (carry)
     {
@@ -335,14 +353,14 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
         {
             sig.insert(sig.begin(), 1);
             i = sig.rend();
-            printDebug(*this);
+            printDebug(toStrDebug(*this));
             break;
         }
         ++(*i);
         carry = (*i >= base);
         *i %= base;
         ++i;
-        printDebug(*this);
+        printDebug(toStrDebug(*this));
     }
     removeZeros();
     return *this;
@@ -350,6 +368,7 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
 
 BigNum& BigNum::operator-=(const BigNum &rhs)
 {
+    printDebug(toStr(*this) + " -= " + toStr(rhs));
     if (rhs.neg)
     {
         return *this += -rhs;
@@ -357,6 +376,11 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
     if (*this < rhs)
     {
         *this = -(rhs - *this);
+        return *this;
+    }
+    if (sig.size() == 0)
+    {
+        *this = -rhs;
         return *this;
     }
     while (exp > rhs.exp)
@@ -369,7 +393,7 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
     vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     vector<char>::reverse_iterator k;
-    printDebug(*this);
+    printDebug(toStrDebug(*this));
     for (; j != rhs.sig.rend(); ++i, ++j)
     {
         temp = *i - *j;
@@ -386,7 +410,7 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
         {
             *i = temp;
         }
-        printDebug(*this);
+        printDebug(toStrDebug(*this));
     }
     while (borrow)
     {
@@ -401,7 +425,7 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
             *i += base;
         }
         ++i;
-        printDebug(*this);
+        printDebug(toStrDebug(*this));
     }
     removeZeros();
     return *this;
@@ -409,6 +433,12 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
 
 BigNum& BigNum::operator*=(const BigNum &rhs)
 {
+    printDebug(toStr(*this) + " *= " + toStr(rhs));
+    if (sig.size() == 0 || rhs.sig.size() == 0)
+    {
+        *this = 0;
+        return *this;
+    }
     if (getDigits() < rhs.getDigits())
     {
         *this = rhs * *this;
@@ -416,11 +446,6 @@ BigNum& BigNum::operator*=(const BigNum &rhs)
     }
     if (1 == rhs.getDigits())
     {
-        if (rhs == 0)
-        {
-            *this = 0;
-            return *this;
-        }
         if (rhs == 1)
         {
             return *this;
@@ -461,6 +486,7 @@ BigNum& BigNum::operator*=(const BigNum &rhs)
 
 BigNum& BigNum::operator/=(BigNum const &rhs)
 {
+    printDebug(toStr(*this) + " /= " + toStr(rhs));
     if (1 == rhs.getDigits())
     {
         if (rhs == 0)
@@ -477,7 +503,7 @@ BigNum& BigNum::operator/=(BigNum const &rhs)
             return *this;
         }
     }
-    if (*this == 0)
+    if (sig.size() == 0)
     {
         return *this;
     }
@@ -576,6 +602,7 @@ BigNum& BigNum::operator/=(BigNum const &rhs)
 
 BigNum& BigNum::operator%=(const BigNum &rhs)
 {
+    printDebug(toStr(*this) + " %= " + toStr(rhs));
     if (Fract(*this) != 0)
     {
         throw string("Error: Non-integer ") + toStr(*this);
@@ -603,11 +630,13 @@ BigNum& BigNum::operator%=(const BigNum &rhs)
 
 BigNum BigNum::operator+() const
 {
+    printDebug("operator+ " + toStr(*this));
     return *this;
 }
 
 BigNum BigNum::operator-() const
 {
+    printDebug("operator- " + toStr(*this));
     BigNum temp = *this;
     temp.neg = !temp.neg;
     return temp;
@@ -615,30 +644,35 @@ BigNum BigNum::operator-() const
 
 BigNum BigNum::operator+(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " + " + toStr(rhs));
     BigNum temp = *this;
     return temp += rhs;
 }
 
 BigNum BigNum::operator-(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " - " + toStr(rhs));
     BigNum temp = *this;
     return temp -= rhs;
 }
 
 BigNum BigNum::operator*(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " * " + toStr(rhs));
     BigNum temp = *this;
     return temp *= rhs;
 }
 
 BigNum BigNum::operator/(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " / " + toStr(rhs));
     BigNum temp = *this;
     return temp /= rhs;
 }
 
 BigNum BigNum::operator%(const BigNum &rhs) const
 {
+    printDebug(toStr(*this) + " % " + toStr(rhs));
     BigNum temp = *this;
     return temp %= rhs;
 }
@@ -740,6 +774,7 @@ void BigNum::alignDigits(const BigNum &bn)
 
 int BigNum::compareMagnitude(const BigNum &bn1, const BigNum &bn2)
 {   // return -1 if 1 < 2, 0 if 1 == 2, 1 if 1 > 2
+    printDebug("compareMagnitude(" + toStr(bn1) + ", " + toStr(bn2) + ")");
     if (bn1.base != bn2.base)
     {
         throw string("Error: Base mismatch.");
@@ -822,17 +857,53 @@ void BigNum::throwInvalidNumber(const string &n)
     throw string("Error: Invalid Number ") + n;
 }
 
-void BigNum::printDebug(const BigNum &bn)
+void printDebug(const string &s)
 {
 #ifdef DEBUG
-    std::cout << std::boolalpha << "Debug: Neg=" << bn.neg
-              <<  " Exp=" << bn.exp 
-              << " Size=" << bn.sig.size() << " ";
+    std::cout << "Debug: " << s << std::endl;
+#endif
+}
+
+#ifdef DEBUG
+string itoa(int i)
+{
+    if (0 == i)
+    {
+        return "0";
+    }
+    static string const digits[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+    bool neg = i < 0;
+    if (neg)
+    {
+        i = -i;
+    }
+    string s;
+    while (i != 0)
+    {
+        s.insert(0, digits[i % 10]);
+        i /= 10;
+    }
+    if (neg)
+    {
+        s.insert(0, "-");
+    }
+    return s;
+}
+#endif
+
+string BigNum::toStrDebug(const BigNum &bn)
+{
+    string s;
+#ifdef DEBUG
+    s += "Neg=";
+    s += (bn.neg ? "true" : "false");
+    s += " Exp=" + itoa(bn.exp);
+    s += " Size=" + itoa(bn.sig.size()) + " ";
     for (int i = 0; i < bn.sig.size(); ++i)
     {
-        std::cout << (int)bn.sig[i];
+        s += (bn.sig[i] + '0');
     }
-    std::cout << std::endl;
 #endif
+    return s;
 }
 
