@@ -60,7 +60,7 @@ class BigNum {
         void shiftRight(unsigned);
         static int compareMagnitude(const BigNum &, const BigNum &);
         static void throwInvalidNumber(const string &);
-        static void printDebug(const BigNum &);
+        static string toStrDebug(const BigNum &);
 
         static const int DefaultBase;
         static const int DefaultPrecision;
