@@ -170,6 +170,10 @@ BigNum Fract(const BigNum &bn)
     {
         i = bn.floorDigits();
     }
+    if (i == bn.sig.size())
+    {
+        return 0;
+    }
     for (; i < bn.sig.size(); ++i)
     {
         temp.sig.push_back(bn.sig[i]);
@@ -563,6 +567,33 @@ BigNum& BigNum::operator/=(BigNum const &rhs)
     return *this;
 }
 
+BigNum& BigNum::operator%=(const BigNum &rhs)
+{
+    if (Fract(*this) != 0)
+    {
+        throw string("Error: Non-integer ") + toStr(*this);
+    }
+    if (rhs.getDigits() == 1)
+    {
+        if (rhs == 0)
+        {
+            throw string("Error: Modulo 0");
+        }
+        if (Abs(rhs) == 1)
+        {
+            *this = 0;
+            return *this;
+        }
+    }
+    // Common residue, not minimal residue
+    *this -= Floor(*this / rhs) * rhs;
+    if (*this < 0)
+    {
+        *this += Abs(rhs);
+    }
+    return *this;
+}
+
 BigNum BigNum::operator+() const
 {
     return *this;
@@ -597,6 +628,12 @@ BigNum BigNum::operator/(const BigNum &rhs) const
 {
     BigNum temp = *this;
     return temp /= rhs;
+}
+
+BigNum BigNum::operator%(const BigNum &rhs) const
+{
+    BigNum temp = *this;
+    return temp %= rhs;
 }
 
 void BigNum::removeZeros()
