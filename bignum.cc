@@ -317,6 +317,7 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
     vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     vector<char>::reverse_iterator k;
+    printDebug(*this);
     for (; j != rhs.sig.rend(); ++i, ++j)
     {
         temp = *i + *j;
@@ -326,6 +327,7 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
         }
         *i = temp % base;
         carry = (temp >= base);
+        printDebug(*this);
     }
     while (carry)
     {
@@ -333,12 +335,14 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
         {
             sig.insert(sig.begin(), 1);
             i = sig.rend();
+            printDebug(*this);
             break;
         }
         ++(*i);
         carry = (*i >= base);
         *i %= base;
         ++i;
+        printDebug(*this);
     }
     removeZeros();
     return *this;
@@ -365,6 +369,7 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
     vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
     vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
     vector<char>::reverse_iterator k;
+    printDebug(*this);
     for (; j != rhs.sig.rend(); ++i, ++j)
     {
         temp = *i - *j;
@@ -381,6 +386,7 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
         {
             *i = temp;
         }
+        printDebug(*this);
     }
     while (borrow)
     {
@@ -395,6 +401,7 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
             *i += base;
         }
         ++i;
+        printDebug(*this);
     }
     removeZeros();
     return *this;
@@ -725,7 +732,7 @@ void BigNum::alignDigits(const BigNum &bn)
         sig.push_back(0);
         --exp;
     }
-    while (sig.size() < bn.sig.size())
+    while (floorDigits() < bn.floorDigits())
     {
         sig.insert(sig.begin(), 0);
     }
@@ -817,12 +824,15 @@ void BigNum::throwInvalidNumber(const string &n)
 
 void BigNum::printDebug(const BigNum &bn)
 {
-    std::cout << "Debug: Exp=" << bn.exp 
+#ifdef DEBUG
+    std::cout << std::boolalpha << "Debug: Neg=" << bn.neg
+              <<  " Exp=" << bn.exp 
               << " Size=" << bn.sig.size() << " ";
     for (int i = 0; i < bn.sig.size(); ++i)
     {
         std::cout << (int)bn.sig[i];
     }
     std::cout << std::endl;
+#endif
 }
 
