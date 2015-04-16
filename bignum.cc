@@ -149,6 +149,14 @@ ostream& operator<<(ostream &os, const BigNum &bn)
     return os;
 }
 
+istream& operator>>(istream &is, BigNum &bn)
+{
+    string temp;
+    is >> temp;
+    bn = BigNum(temp);
+    return is;
+}
+
 BigNum Floor(const BigNum &bn)
 {
     BigNum temp;
@@ -389,10 +397,10 @@ BigNum& BigNum::operator-=(const BigNum &rhs)
         *this = -rhs;
         return *this;
     }
-    while (exp > rhs.exp)
+    if (exp > rhs.exp)
     {   // Align decimal places
-        sig.push_back(0);
-        --exp;
+        sig.insert(sig.end(), exp - rhs.exp, 0);
+        exp = rhs.exp;
     }
     char temp = 0;
     bool borrow = false;
@@ -742,10 +750,10 @@ void BigNum::shiftLeft(unsigned x)
         return;
     }
     x -= 0 - exp;
-    while (x > 0)
+    if (x > 0)
     {
-        sig.push_back(0);
-        --x;
+        sig.insert(sig.end(), x, 0);
+        x = 0;
     }
     exp = x;
 }
@@ -767,10 +775,10 @@ void BigNum::shiftRight(unsigned x)
 
 void BigNum::alignDigits(const BigNum &bn)
 {
-    while (exp > bn.exp)
+    if (exp > bn.exp)
     {
-        sig.push_back(0);
-        --exp;
+        sig.insert(sig.end(), exp - bn.exp, 0);
+        exp = bn.exp;
     }
     while (floorDigits() < bn.floorDigits())
     {
