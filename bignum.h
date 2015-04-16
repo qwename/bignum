@@ -7,6 +7,7 @@ using std::vector;
 using std::string;
 #include <iostream>
 using std::ostream;
+using std::istream;
 
 class BigNum {
     public:
@@ -74,5 +75,6 @@ class BigNum {
 };
 
 ostream& operator<<(ostream &os, const BigNum &bn);
+istream& operator>>(istream &is, BigNum &bn);
 
 #endif
