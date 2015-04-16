@@ -5,6 +5,8 @@
 using std::vector;
 #include <string>
 using std::string;
+#include <iostream>
+using std::ostream;
 
 class BigNum {
     public:
@@ -70,5 +72,7 @@ class BigNum {
         int exp;                // Exponent
         static int precision;
 };
+
+ostream& operator<<(ostream &os, const BigNum &bn);
 
 #endif
