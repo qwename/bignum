@@ -5,7 +5,7 @@
 static void printDebug(const string &s);
 
 const int BigNum::DefaultBase = 10;
-const int BigNum::DefaultPrecision = 20;
+const int BigNum::DefaultPrecision = 30;
 int BigNum::precision = DefaultPrecision;
 
 BigNum::BigNum() : neg(false), sig(), base(DefaultBase), exp(0)
@@ -141,6 +141,12 @@ string toStr(const BigNum &bn)
         }
     }
     return s;
+}
+
+ostream& operator<<(ostream &os, const BigNum &bn)
+{
+    os << toStr(bn);
+    return os;
 }
 
 BigNum Floor(const BigNum &bn)
