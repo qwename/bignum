@@ -135,20 +135,52 @@ void printTime(std::clock_t i, std::clock_t f)
 int main(int argc, char *argv[])
 {
     string s1;
+    vector<BigNum> v;
+    cout << "Reading inputs while testing Floor(), Fract() functions, "
+         << "press Ctrl-D (EOF) to stop" << endl
+         << "Format: [Input] Digits: [# of digits]" << endl
+         << "[Floor] [Fract]" << endl
+         << "[Floor(Floor)] [Fract(Floor)]" << endl
+         << "[Floor(Fract)] [Fract(Fract)]" << endl;
     while (cin >> s1)
     {
         try
         {
             BigNum temp(s1);
+            v.push_back(temp);
             BigNum fl(Floor(temp)), fr(Fract(temp));
-            cout << temp << " " << temp.getDigits() << endl;
-            cout << fl << " " << fr << " "
-                 << Floor(fl) << " " << Fract(fl) << " "
-                 << Floor(fr) << " " << Fract(fr) << endl;
+            cout << temp << " Digits: " << temp.getDigits() << endl;
+            cout << fl << " " << fr << endl
+                 << Floor(fl) 
+                 << " " << Fract(fl) << endl
+                 << Floor(fr) 
+                 << " " << Fract(fr) << endl;
         }
         catch (string s)
         {
             cout << s << endl;
+        }
+    }
+    cout << "Now testing comparison operators ==, <, "
+         << "only prints if true" << endl;
+    for (int i = 0; i < v.size(); ++i)
+    {
+        for (int j = 0; j < v.size(); ++j)
+        {
+            if (i == j)
+            {
+                continue;
+            }
+            bool equal = v[i] == v[j];
+            bool less = v[i] < v[j];
+            if (equal)
+            {
+                cout << v[i] << " == " << v[j] << endl;
+            }
+            if (less)
+            {
+                cout << v[i] << " < " << v[j] << endl;
+            }
         }
     }
     return 0;
