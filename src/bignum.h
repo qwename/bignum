@@ -54,6 +54,7 @@ class BigNum {
         BigNum operator%(const BigNum &rhs) const;
 
     private:
+        bool equalZero() const;
         void removeZeros();     // Remove leading and trailing zeros
         void alignDigits(const BigNum &);
         // Number of digits in representation
