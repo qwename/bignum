@@ -20,6 +20,8 @@ string toStr(const BigNum &bn)
     if (bn.floorSize() == 0)
     {   // 0 < abs(bn) < 1
         s += "0.";
+        // Add leading zeros
+        s.insert(s.end(), -bn.exp - bn.sig.size(), '0');
         i = bn.sig.rbegin(); end = bn.sig.rend();
         for (int j = 0; i != end && j < bn.precision; ++i, ++j)
         {
