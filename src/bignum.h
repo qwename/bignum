@@ -56,8 +56,12 @@ class BigNum {
     private:
         void removeZeros();     // Remove leading and trailing zeros
         void alignDigits(const BigNum &);
+        // Number of digits in representation
         int floorDigits() const;
         int fractDigits() const;
+        // Actual number of bytes stored
+        int floorSize() const;
+        int fractSize() const;
         static void throwInvalidNumber(const string &);
         friend string toStrDebug(const BigNum &);
 
