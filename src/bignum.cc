@@ -189,6 +189,21 @@ int BigNum::fractDigits() const
     return -exp;
 }
 
+int BigNum::floorSize() const
+{
+    int size = sig.size() + exp;
+    if (size <= 0)
+    {   // Magnitude between 0 and 1
+        return 0;
+    }
+    return size;
+}
+
+int BigNum::fractSize() const
+{
+    return sig.size() - floorSize();
+}
+
 void BigNum::throwInvalidNumber(const string &n)
 {
     throw string("Error: Invalid Number ") + n;
