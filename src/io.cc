@@ -17,7 +17,7 @@ string toStr(const BigNum &bn)
         s += "-";
     }
     vector<char>::const_reverse_iterator i, end;
-    if (bn.sig.size() + bn.exp <= 0)
+    if (floorSize() == 0)
     {   // 0 < abs(bn) < 1
         s += "0.";
         i = bn.sig.rbegin(); end = bn.sig.rend();
