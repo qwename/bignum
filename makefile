@@ -17,10 +17,13 @@ LKFLAGS := -Wall
 COMPILE = $(CC) $(CCFLAGS) $^ -o $@
 LINK = $(CC) $(LKFLAGS) $^ -o $@
 
+DEBUG ?= 0
 ifeq ($(DEBUG),1)
-	$(COMPILE) += -g -DDEBUG
-	$(LINK) += -g
+	CCFLAGS := $(CCFLAGS) -g -DDEBUG
+	OBJDIR := $(OBJDIR)/debug
+	BINDIR := $(BINDIR)/debug
 endif
+
 
 .PHONY : clean rebuild
 ifeq ($(.DEFAULT_GOAL),)
