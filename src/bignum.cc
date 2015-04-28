@@ -149,11 +149,18 @@ BigNum BigNum::operator%(const BigNum &rhs) const
 
 void BigNum::removeZeros()
 {
-    while (floorDigits() > 1 && 0 == sig.back()) // Remove leading zeros
+    while (sig.size() > 1 && 0 == sig.back()) // Remove leading zeros
     {
         sig.pop_back();
     }
-    const int digits = getDigits();
+    const int digits = sig.size();
+    // Make sure ZERO has the right values
+    if (1 == digits && 0 == sig[0])
+    {
+        neg = false;
+        exp = 0;
+        return;
+    }
     int trail_zero = 0;
     while (trail_zero < digits && 0 == sig[trail_zero])
     {   // Check for trailling zeros
@@ -162,12 +169,6 @@ void BigNum::removeZeros()
     // Remove trailing zeros, if any
     sig.erase(sig.begin(), sig.begin() + trail_zero);
     exp += trail_zero;
-    // Make sure ZERO has the right values
-    if (1 == sig.size() && 0 == sig[0])
-    {
-        neg = false;
-        exp = 0;
-    }
 }
 
 int BigNum::floorDigits() const
