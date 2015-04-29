@@ -179,13 +179,22 @@ int main(int argc, char *argv[])
             }
         }
     }
-    cout << "Now testing addition operators ++, +=, +" << endl;
+    cout << "Now testing addition operators +=, +" << endl;
     for (unsigned i = 0; i < v.size(); ++i)
     {
         for (unsigned j = 0; j < v.size(); ++j)
         {
             cout << v[i] << " + " << v[j] << " = " 
                  << v[i] + v[j] << endl;
+        }
+    }
+    cout << "Now testing subtraction operators -=, -" << endl;
+    for (unsigned i = 0; i < v.size(); ++i)
+    {
+        for (unsigned j = 0; j < v.size(); ++j)
+        {
+            cout << v[i] << " - " << v[j] << " = " 
+                 << v[i] - v[j] << endl;
         }
     }
         clock_t begin, finish;
