@@ -36,7 +36,7 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
         return *this;
     }
     if (neg && !rhs.neg)
-    {   // For this < 0, this + rhs == -(|this| - rhs)
+    {   // For this < 0, rhs > 0, this + rhs == -(|this| - rhs)
         neg = false;
         *this -= rhs;
         neg = true;
