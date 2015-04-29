@@ -74,7 +74,7 @@ bool BigNum::operator<(const BigNum &rhs) const
     }
     else if (floorSize() != 0)
     {   // Both magnitude greater than zero
-        end = i + floorDigits();
+        end = i + floorSize();
         for (; i != end; ++i, ++j)
         {   // Compare digits starting from most significant position
             if (*i != *j)
