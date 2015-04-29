@@ -26,7 +26,6 @@ BigNum BigNum::operator++(int)
 BigNum& BigNum::operator+=(const BigNum &rhs)
 {
     printDebug(toStr(*this) + " += " + toStr(rhs));
-    /*
     if (equalZero())
     {
         *this = rhs;
@@ -37,14 +36,16 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
         return *this;
     }
     if (neg && !rhs.neg)
-    {
-        *this = rhs - -(*this);
+    {   // For this < 0, this + rhs == -(|this| - rhs)
+        neg = false;
+        *this -= rhs;
+        neg = true;
         return *this;
     }
     if (!neg && rhs.neg)
     {
         return *this -= -rhs;
-    }*/
+    }
     vector<char>::iterator i;
     vector<char>::const_iterator j, end;
     i = sig.begin();
