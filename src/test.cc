@@ -123,6 +123,7 @@ bool isPrime(const unsigned &x)
     primes_i.push_back(x);
     return true;
 }
+*/
 
 void printTime(std::clock_t i, std::clock_t f)
 {
@@ -130,7 +131,6 @@ void printTime(std::clock_t i, std::clock_t f)
               << 1000.0 * (f - i) / CLOCKS_PER_SEC
               << " ms" << std::endl;
 }
-*/
 
 int main(int argc, char *argv[])
 {
@@ -163,14 +163,10 @@ int main(int argc, char *argv[])
     }
     cout << "Now testing comparison operators ==, <, "
          << "only prints if true" << endl;
-    for (int i = 0; i < v.size(); ++i)
+    for (unsigned i = 0; i < v.size(); ++i)
     {
-        for (int j = 0; j < v.size(); ++j)
+        for (unsigned j = 0; j < v.size(); ++j)
         {
-            if (i == j)
-            {
-                continue;
-            }
             bool equal = v[i] == v[j];
             bool less = v[i] < v[j];
             if (equal)
@@ -183,9 +179,35 @@ int main(int argc, char *argv[])
             }
         }
     }
+    cout << "Now testing addition operators ++, +=, +" << endl;
+    for (unsigned i = 0; i < v.size(); ++i)
+    {
+        for (unsigned j = 0; j < v.size(); ++j)
+        {
+            cout << v[i] << " + " << v[j] << " = " 
+                 << v[i] + v[j] << endl;
+        }
+    }
+        clock_t begin, finish;
+        begin = clock();
+        const int loops = 1000000;
+        const BigNum loop = loops;
+        for (BigNum i = 0; i < loop; ++i)
+        {
+
+        }
+        finish = clock();
+        printTime(begin, finish);
+        begin = clock();
+        for (int i = 0; i < loops; ++i)
+        {
+
+        }
+        finish = clock();
+        printTime(begin, finish);
+        return 0;
     return 0;
 /*
-    test();
     try
     {
         clock_t begin, finish;
