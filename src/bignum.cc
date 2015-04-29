@@ -192,7 +192,11 @@ int BigNum::fractDigits() const
 
 int BigNum::floorSize() const
 {
-    int size = sig.size() + exp;
+    if (exp >= 0)
+    {
+        return sig.size();
+    }
+    const int size = sig.size() + exp;
     if (size <= 0)
     {   // Magnitude between 0 and 1
         return 0;
