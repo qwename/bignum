@@ -88,22 +88,6 @@ void BigNum::SetPrecision(int prec)
     precision = prec;
 }
 
-/*
-BigNum& BigNum::operator--()
-{
-    printDebug("--" + toStr(*this));
-    *this -= BigNum(1);
-    return *this;
-}
-
-BigNum BigNum::operator--(int)
-{
-    printDebug(toStr(*this) + "--");
-    BigNum temp = *this;
-    *this -= BigNum(1);
-    return temp;
-}
-
 BigNum BigNum::operator+() const
 {
     printDebug("operator+ " + toStr(*this));
@@ -118,13 +102,7 @@ BigNum BigNum::operator-() const
     return temp;
 }
 
-BigNum BigNum::operator-(const BigNum &rhs) const
-{
-    printDebug(toStr(*this) + " - " + toStr(rhs));
-    BigNum temp = *this;
-    return temp -= rhs;
-}
-
+/*
 BigNum BigNum::operator*(const BigNum &rhs) const
 {
     printDebug(toStr(*this) + " * " + toStr(rhs));
