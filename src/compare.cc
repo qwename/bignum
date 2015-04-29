@@ -53,8 +53,8 @@ bool BigNum::operator<(const BigNum &rhs) const
     vector<char>::const_reverse_iterator i, j, end;
     i = sig.rbegin();
     j = rhs.sig.rbegin();
-    if (floorSize() != rhs.floorSize())
-    {   // Both must have one digit floor
+    if (floorSize() != rhs.floorSize() && (floorSize() <= 1 || rhs.floorSize() <= 1))
+    {   // Both have one digit floor
         if (equalZero())
         {   // If this == 0, this < rhs if both positive, or neg false
             return !neg;
