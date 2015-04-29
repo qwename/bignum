@@ -1,4 +1,5 @@
 #include "bignum.h"
+#include <algorithm>
 
 BigNum BigNum::operator+(const BigNum &rhs) const
 {
@@ -25,6 +26,16 @@ BigNum BigNum::operator++(int)
 BigNum& BigNum::operator+=(const BigNum &rhs)
 {
     printDebug(toStr(*this) + " += " + toStr(rhs));
+    /*
+    if (equalZero())
+    {
+        *this = rhs;
+        return *this;
+    }
+    if (rhs.equalZero())
+    {
+        return *this;
+    }
     if (neg && !rhs.neg)
     {
         *this = rhs - -(*this);
@@ -33,43 +44,87 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
     if (!neg && rhs.neg)
     {
         return *this -= -rhs;
-    }
-    if (sig.size() == 0)
-    {
-        *this = rhs;
-        return *this;
-    }
-    char temp = 0;
-    bool carry = false;
-    alignDigits(rhs);
-    vector<char>::reverse_iterator i = sig.rbegin() + (fractDigits() - rhs.fractDigits());
-    vector<char>::const_reverse_iterator j = rhs.sig.rbegin();
-    vector<char>::reverse_iterator k;
-    printDebug(toStrDebug(*this));
-    for (; j != rhs.sig.rend(); ++i, ++j)
-    {
-        temp = *i + *j;
-        if (carry)  // Previous
+    }*/
+    vector<char>::iterator i;
+    vector<char>::const_iterator j, end;
+    i = sig.begin();
+    j = rhs.sig.begin();
+    const int diff = exp - rhs.exp;
+    if (diff > 0)
+    {   // rhs has lower index
+        exp = rhs.exp;
+        end = rhs.sig.begin() + std::min((int)rhs.sig.size(), diff);
+        int k;
+        for (k = 0; j != end; ++j, ++k)
         {
-            ++temp;
+            sig.insert(sig.begin() + k, *j);
         }
-        *i = temp % base;
-        carry = (temp >= base);
+        const int gap = diff - rhs.sig.size();
+        if (gap > 0)
+        {   // rhs has no more indices remaining
+            // Fill gaps with 0s
+            sig.insert(sig.begin() + k, gap, 0);
+            removeZeros();
+            return *this;
+        }
+        i = sig.begin() + k; 
+    }
+    else if (diff < 0)
+    {   // this has lower index
+        const int gap = -diff - sig.size();
+        if (gap > 0)
+        {   // this has no more indices remaining
+            // Fill gaps with 0s
+            sig.insert(sig.end(), gap, 0);
+            // Copy remaining digits from rhs
+            sig.reserve(sig.size() + (rhs.sig.end() - j));
+            for (; j != rhs.sig.end(); ++j)
+            {
+                sig.push_back(*j);
+            }
+            removeZeros();
+            return *this;
+        }
+        i = sig.begin() + -diff;
+    }
+    // Overlapping digits
+    int carry = 0;
+    for (; i != sig.end(); ++i)
+    {
+        if (j != rhs.sig.end())
+        {
+            *i += *j;
+            ++j;
+        }
+        *i += carry;
+        if (*i >= base)
+        {
+            carry = 1;
+            *i -= base;
+        }
+        else
+        {
+            carry = 0;
+        }
         printDebug(toStrDebug(*this));
     }
-    while (carry)
+    for (; j != rhs.sig.end(); ++j)
     {
-        if (sig.rend() == i)
+        sig.push_back(*j + carry);
+        if (sig.back() >= base)
         {
-            sig.insert(sig.begin(), 1);
-            i = sig.rend();
-            printDebug(toStrDebug(*this));
-            break;
+            carry = 1;
+            sig.back() -= base;
         }
-        ++(*i);
-        carry = (*i >= base);
-        *i %= base;
-        ++i;
+        else
+        {
+            carry = 0;
+        }
+        printDebug(toStrDebug(*this));
+    }
+    if (1 == carry)
+    {
+        sig.push_back(carry);
         printDebug(toStrDebug(*this));
     }
     removeZeros();
