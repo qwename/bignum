@@ -102,29 +102,6 @@ BigNum BigNum::operator-() const
     return temp;
 }
 
-/*
-BigNum BigNum::operator*(const BigNum &rhs) const
-{
-    printDebug(toStr(*this) + " * " + toStr(rhs));
-    BigNum temp = *this;
-    return temp *= rhs;
-}
-
-BigNum BigNum::operator/(const BigNum &rhs) const
-{
-    printDebug(toStr(*this) + " / " + toStr(rhs));
-    BigNum temp = *this;
-    return temp /= rhs;
-}
-
-BigNum BigNum::operator%(const BigNum &rhs) const
-{
-    printDebug(toStr(*this) + " % " + toStr(rhs));
-    BigNum temp = *this;
-    return temp %= rhs;
-}
-*/
-
 void BigNum::removeZeros()
 {
     while (sig.size() > 1 && 0 == sig.back()) // Remove leading zeros
