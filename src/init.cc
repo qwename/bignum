@@ -9,6 +9,7 @@ BigNum::BigNum(const BigNum &rhs) : neg(rhs.neg), sig(rhs.sig), base(DefaultBase
 
 BigNum::BigNum(int n) : neg(n < 0), sig(), base(DefaultBase), exp(0)
 {
+    printDebug("Init BigNum(int)");
     if (0 == n)
     {
         sig.push_back(0);
@@ -37,6 +38,7 @@ BigNum::BigNum(int n) : neg(n < 0), sig(), base(DefaultBase), exp(0)
 
 BigNum::BigNum(string n) : neg('-' == n[0]), sig(), base(DefaultBase), exp(0)
 {
+    printDebug("Init BigNum(string): " + n);
     if (n.size() < 1)
     {
         throwInvalidNumber(n);
@@ -102,6 +104,7 @@ BigNum::BigNum(string n) : neg('-' == n[0]), sig(), base(DefaultBase), exp(0)
 
 BigNum& BigNum::operator=(const BigNum &rhs)
 {
+    printDebug("Init operator=: " + toStr(rhs));
     neg = rhs.neg;
     sig = rhs.sig;
     exp = rhs.exp;
