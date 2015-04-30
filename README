@@ -1,0 +1,3 @@
+How to test:
+Run test.sh, defaults to debug build.
+Pass in anything other than "debug" for standard build.
