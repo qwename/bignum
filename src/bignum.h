@@ -55,6 +55,9 @@ class BigNum {
 
     private:
         bool equalZero() const;
+        // Check if number is power of the base
+        // In representation, it is always 1, 10, 100,...
+        bool equalBasePower() const;
         void removeZeros();     // Remove leading and trailing zeros
         void alignDigits(const BigNum &);
         // Number of digits in representation
