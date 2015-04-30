@@ -83,13 +83,13 @@ void printDebug(const string &s)
 }
 
 #ifdef DEBUG
+static string const digits[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 string itoa(int i)
 {
     if (0 == i)
     {
         return "0";
     }
-    static string const digits[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
     bool neg = i < 0;
     if (neg)
     {
@@ -117,9 +117,9 @@ string toStrDebug(const BigNum &bn)
     s += (bn.neg ? "true" : "false");
     s += " Exp=" + itoa(bn.exp);
     s += " Size=" + itoa(bn.sig.size()) + " ";
-    for (int i = 0; i < bn.sig.size(); ++i)
+    for (int i = bn.sig.size() - 1; i >= 0; --i)
     {
-        s += (bn.sig[i] + '0');
+        s += digits[bn.sig[i]];
     }
 #endif
     return s;
