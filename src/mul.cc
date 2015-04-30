@@ -7,7 +7,7 @@ BigNum BigNum::operator*(const BigNum &rhs) const
     return temp *= rhs;
 }
 
-BigNum& BigNum::operator*=(const BigNum &rhs) const
+BigNum& BigNum::operator*=(const BigNum &rhs)
 {
 
 }
