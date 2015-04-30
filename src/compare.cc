@@ -116,16 +116,21 @@ bool BigNum::operator<=(const BigNum &rhs) const
 bool BigNum::operator>(const BigNum &rhs) const
 {
     printDebug(toStr(*this) + " > " + toStr(rhs));
-    return !(*this <= rhs);
+    return rhs < *this;
 }
 
 bool BigNum::operator>=(const BigNum &rhs) const
 {
     printDebug(toStr(*this) + " >= " + toStr(rhs));
-    return !(*this < rhs);
+    return rhs <= *this;
 }
 
 bool BigNum::equalZero() const
 {
     return neg == false && sig.size() == 1 && 0 == sig[0] && exp == 0;
+}
+
+bool BigNum::equalBasePower() const
+{
+    return sig.size() == 1 && 1 == sig[0];
 }
