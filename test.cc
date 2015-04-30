@@ -9,7 +9,6 @@ using std::endl;
 #include <array>
 using std::array;
 
-/*
 void printTest(ostream &os, BigNum a, BigNum b, string op)
 {
     os << a << " " << op << " " << b << " = ";
@@ -96,6 +95,21 @@ BigNum fact(BigNum x)
     return val;
 }
 
+BigNum sum(BigNum x)
+{
+    if (x <= 0)
+    {
+        return 0;
+    }
+    BigNum val = x;
+    while (x > 0)
+    {
+        --x;
+        val += x;
+    }
+    return val;
+}
+
 vector<BigNum> primes;
 bool isPrime(const BigNum &x)
 {
@@ -123,7 +137,6 @@ bool isPrime(const unsigned &x)
     primes_i.push_back(x);
     return true;
 }
-*/
 
 void printTime(std::clock_t i, std::clock_t f)
 {
@@ -179,48 +192,46 @@ int main(int argc, char *argv[])
             }
         }
     }
-    cout << "Now testing addition operators +=, +" << endl;
+    cout << "Now testing arithmetic operators" << endl;
     for (unsigned i = 0; i < v.size(); ++i)
     {
         for (unsigned j = 0; j < v.size(); ++j)
         {
             cout << v[i] << " + " << v[j] << " = " 
                  << v[i] + v[j] << endl;
-        }
-    }
-    cout << "Now testing subtraction operators -=, -" << endl;
-    for (unsigned i = 0; i < v.size(); ++i)
-    {
-        for (unsigned j = 0; j < v.size(); ++j)
-        {
             cout << v[i] << " - " << v[j] << " = " 
                  << v[i] - v[j] << endl;
+            cout << v[i] << " * " << v[j] << " = " 
+                 << v[i] * v[j] << endl;
         }
     }
-        clock_t begin, finish;
-        begin = clock();
-        const int loops = 1000000;
-        const BigNum loop = loops;
-        for (BigNum i = 0; i < loop; ++i)
-        {
-
-        }
-        finish = clock();
-        printTime(begin, finish);
-        begin = clock();
-        for (int i = 0; i < loops; ++i)
-        {
-
-        }
-        finish = clock();
-        printTime(begin, finish);
-        return 0;
-    return 0;
-/*
     try
     {
+        BigNum max = 100;
+        if (argc == 2)
+        {
+            max = BigNum(argv[1]);
+        }
         clock_t begin, finish;
         begin = clock();
+
+        BigNum x, y;
+        begin = clock();
+        y = sum(max);
+        finish = clock();
+        print(y);
+        printTime(begin, finish);
+        cout << "Summation from 1 to " << toStr(max) << " has " << y.getDigits() << " digits." << endl;
+
+        begin = clock();
+        // while ((clock()-begin)/CLOCKS_PER_SEC < 5)
+        x = fact(max);
+        finish = clock();
+        print(x);
+        printTime(begin, finish);
+        cout << toStr(max) << "! has " << x.getDigits() << " digits." << endl;
+        return 0;
+
         const int loops = 100000;
         const BigNum loop = loops;
         for (BigNum i = 0; i < loop; ++i)
@@ -236,12 +247,7 @@ int main(int argc, char *argv[])
         }
         finish = clock();
         printTime(begin, finish);
-        return 0;
-        BigNum max = 100;
-        if (argc == 2)
-        {
-            max = BigNum(argv[1]);
-        }
+
         primes_i.push_back(2);
         begin = clock();
         for (unsigned i = 3; max > primes_i.size(); i += 2)
@@ -251,6 +257,7 @@ int main(int argc, char *argv[])
         finish = clock();
         printTime(begin, finish);
         cout << primes_i.back() << std::endl;
+
         primes.push_back(2);
         begin = clock();
         for (BigNum i = 3; max > primes.size(); i += 2)
@@ -260,15 +267,8 @@ int main(int argc, char *argv[])
         finish = clock();
         printTime(begin, finish);
         print(primes.back());
+
         return 0;
-        BigNum x(1);
-        begin = clock();
-        // while ((clock()-begin)/CLOCKS_PER_SEC < 5)
-        x = fact(max);
-        finish = clock();
-        print(x);
-        printTime(begin, finish);
-        cout << toStr(max) << "! has " << x.getDigits() << " digits." << endl;
     }
     catch (string e)
     {
@@ -277,5 +277,4 @@ int main(int argc, char *argv[])
     return 0;
     test();
     return 0;
-*/
 }
