@@ -3,23 +3,23 @@ SRCDIR := src
 BINDIR := bin
 DIRS = $(SRCDIR) $(OBJDIR) $(BINDIR)
 
-_SRCES := bignum init compare io add sub mul div mod test
+_SRCES := bignum init compare io add sub mul div mod
 _HDRES := bignum
-_OPTBIN := test
+_OPTBIN := bignum
 SRCES = $(foreach obj,$(_SRCES:=.cc),$(SRCDIR)/$(obj))
 HDRES = $(foreach obj,$(_HDRES:=.h),$(SRCDIR)/$(obj))
 OBJS = $(foreach obj,$(_SRCES:=.o),$(OBJDIR)/$(obj))
-OPTBIN = $(BINDIR)/$(_OPTBIN)
+OPTBIN = $(BINDIR)/$(_OPTBIN).a
 
-CC := g++
-CCFLAGS := -c -std=c++11 -Wall
-LKFLAGS := -Wall
-COMPILE = $(CC) $(CCFLAGS) $^ -o $@
-LINK = $(CC) $(LKFLAGS) $^ -o $@
+CXX := g++
+CXXFLAGS := -c -std=c++11 -Wall
+LNKFLAGS := -Wall
+COMPILE = $(CXX) $(CXXFLAGS) $^ -o $@
+STATICLIB = ar -cq $(OPTBIN) $(OBJS)
 
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
-	CCFLAGS := $(CCFLAGS) -g -DDEBUG
+	CXXFLAGS := $(CXXFLAGS) -g -DDEBUG
 	OBJDIR := $(OBJDIR)/debug
 	BINDIR := $(BINDIR)/debug
 endif
@@ -33,7 +33,7 @@ endif
 all : $(DIRS) $(OPTBIN)
 
 $(OPTBIN) : $(OBJS)
-	$(LINK)
+	$(STATICLIB)
 
 clean :
 	-rm $(OPTBIN) $(OBJS)
