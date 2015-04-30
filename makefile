@@ -15,7 +15,7 @@ CXX := g++
 CXXFLAGS := -c -std=c++11 -Wall
 LNKFLAGS := -Wall
 COMPILE = $(CXX) $(CXXFLAGS) $^ -o $@
-STATICLIB = ar -cq $(OPTBIN) $(OBJS)
+STATICLIB = ar -rcs $@ $^
 
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
