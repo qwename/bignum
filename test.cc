@@ -1,4 +1,4 @@
-#include "src/bignum.h"
+#include "src/bigfloat.h"
 #include <ctime>
 using std::clock_t;
 #include <iomanip>
@@ -9,7 +9,7 @@ using std::endl;
 #include <array>
 using std::array;
 
-void printTest(ostream &os, BigNum a, BigNum b, string op)
+void printTest(ostream &os, BigFloat a, BigFloat b, string op)
 {
     os << a << " " << op << " " << b << " = ";
     if ("+" == op)
@@ -31,7 +31,7 @@ void printTest(ostream &os, BigNum a, BigNum b, string op)
     os << endl;
 }
 
-void testOps(ostream &os, BigNum a, BigNum b)
+void testOps(ostream &os, BigFloat a, BigFloat b)
 {
     static const array<string, 4> ops = { "+", "-", "*", "/" };
     for (array<string, 4>::const_iterator i = ops.begin(); i != ops.end(); ++i)
@@ -53,7 +53,7 @@ void test()
         }
         try
         {
-            BigNum x(a);
+            BigFloat x(a);
             while (true)
             {
                 cin >> b;
@@ -63,7 +63,7 @@ void test()
                 }
                 try
                 {
-                    BigNum y(b);
+                    BigFloat y(b);
                     testOps(cout, x, y);
                     break;
                 }
@@ -80,13 +80,13 @@ void test()
     }
 }
 
-BigNum fact(BigNum x)
+BigFloat fact(BigFloat x)
 {
     if (x == 0)
     {
         return 1;
     }
-    BigNum val = x;
+    BigFloat val = x;
     while (x > 1)
     {
         --x;
@@ -95,13 +95,13 @@ BigNum fact(BigNum x)
     return val;
 }
 
-BigNum sum(BigNum x)
+BigFloat sum(BigFloat x)
 {
     if (x <= 0)
     {
         return 0;
     }
-    BigNum val = x;
+    BigFloat val = x;
     while (x > 0)
     {
         --x;
@@ -110,10 +110,10 @@ BigNum sum(BigNum x)
     return val;
 }
 
-vector<BigNum> primes;
-bool isPrime(const BigNum &x)
+vector<BigFloat> primes;
+bool isPrime(const BigFloat &x)
 {
-    for (vector<BigNum>::const_iterator j = primes.begin() + 1; j != primes.end() && *j * *j <= x; ++j)
+    for (vector<BigFloat>::const_iterator j = primes.begin() + 1; j != primes.end() && *j * *j <= x; ++j)
     {
         if (x % *j == 0)
         {
@@ -148,7 +148,7 @@ void printTime(std::clock_t i, std::clock_t f)
 int main(int argc, char *argv[])
 {
     string s1;
-    vector<BigNum> v;
+    vector<BigFloat> v;
     cout << "Reading inputs while testing Floor(), Fract() functions, "
          << "press Ctrl-D (EOF) to stop" << endl
          << "Format: [Input] Digits: [# of digits]" << endl
@@ -159,9 +159,9 @@ int main(int argc, char *argv[])
     {
         try
         {
-            BigNum temp(s1);
+            BigFloat temp(s1);
             v.push_back(temp);
-            BigNum fl(Floor(temp)), fr(Fract(temp));
+            BigFloat fl(Floor(temp)), fr(Fract(temp));
             cout << temp << " Digits: " << temp.getDigits() << endl;
             cout << fl << " " << fr << endl
                  << Floor(fl) 
@@ -207,34 +207,34 @@ int main(int argc, char *argv[])
     }
     try
     {
-        BigNum max = 100;
+        BigFloat max = 100;
         if (argc == 2)
         {
-            max = BigNum(argv[1]);
+            max = BigFloat(argv[1]);
         }
         clock_t begin, finish;
         begin = clock();
 
-        BigNum x, y;
+        BigFloat x, y;
         begin = clock();
         y = sum(max);
         finish = clock();
-        print(y);
+        cout << y << endl;
         printTime(begin, finish);
-        cout << "Summation from 1 to " << toStr(max) << " has " << y.getDigits() << " digits." << endl;
+        cout << "Summation from 1 to " << max << " has " << y.getDigits() << " digits." << endl;
 
         begin = clock();
         // while ((clock()-begin)/CLOCKS_PER_SEC < 5)
         x = fact(max);
         finish = clock();
-        print(x);
+        cout << x << endl;
         printTime(begin, finish);
-        cout << toStr(max) << "! has " << x.getDigits() << " digits." << endl;
+        cout << max << "! has " << x.getDigits() << " digits." << endl;
         return 0;
 
         const int loops = 100000;
-        const BigNum loop = loops;
-        for (BigNum i = 0; i < loop; ++i)
+        const BigFloat loop = loops;
+        for (BigFloat i = 0; i < loop; ++i)
         {
 
         }
@@ -260,13 +260,13 @@ int main(int argc, char *argv[])
 
         primes.push_back(2);
         begin = clock();
-        for (BigNum i = 3; max > primes.size(); i += 2)
+        for (BigFloat i = 3; max > primes.size(); i += 2)
         {
             isPrime(i);
         }
         finish = clock();
         printTime(begin, finish);
-        print(primes.back());
+        cout << primes.back() << endl;
 
         return 0;
     }
