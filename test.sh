@@ -8,6 +8,10 @@ if [ "$#" -ge 1 ]; then
         make DEBUG=1 && \
         g++ test.o bin/debug/bignum.a -o test && \
         ./test $2 < data
+    elif [ "$1" == "speed" ]; then
+        make SPEED=1 && \
+        g++ test.o bin/bignum.a -o test && \
+        ./test $2 < data
     else
         make && \
         g++ test.o bin/bignum.a -o test && \
