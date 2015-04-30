@@ -97,29 +97,25 @@ BigNum& BigNum::operator+=(const BigNum &rhs)
             *i += *j;
             ++j;
         }
-        *i += carry;
-        if (*i >= base)
-        {
-            carry = 1;
-            *i -= base;
+        else if (0 == carry)
+        {   // Nothing more to add
+            break;
         }
-        else
+        *i += carry;
+        carry = *i / base;
+        if (carry != 0)
         {
-            carry = 0;
+            *i -= base;
         }
         printDebug(toStrDebug(*this));
     }
     for (; j != rhs.sig.end(); ++j)
     {
         sig.push_back(*j + carry);
-        if (sig.back() >= base)
+        carry = sig.back() / base;
+        if (carry != 0)
         {
-            carry = 1;
             sig.back() -= base;
-        }
-        else
-        {
-            carry = 0;
         }
         printDebug(toStrDebug(*this));
     }
