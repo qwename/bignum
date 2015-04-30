@@ -3,7 +3,7 @@ SRCDIR := src
 BINDIR := bin
 DIRS = $(SRCDIR) $(OBJDIR) $(BINDIR)
 
-_SRCES := bignum init compare io add sub test
+_SRCES := bignum init compare io add sub mul div mod test
 _HDRES := bignum
 _OPTBIN := test
 SRCES = $(foreach obj,$(_SRCES:=.cc),$(SRCDIR)/$(obj))
